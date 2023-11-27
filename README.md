@@ -1,6 +1,6 @@
 # sudoku
 
-FIXME: description
+Sudoku game written in Clojure which is played through terminal
 
 ## Installation
 
