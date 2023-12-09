@@ -11,3 +11,16 @@ pom.xml.asc
 /.prepl-port
 .hgignore
 .hg/
+
+.lein*
+
+.idea/
+*.iml
+
+/doc/
+
+*.swp
+*~
+
+/log/
+*.log
