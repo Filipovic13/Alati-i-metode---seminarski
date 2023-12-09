@@ -1,31 +1,61 @@
 (ns sudoku.core
   (:gen-class))
 
-;; initail sudoku grid
-(def sudoku-grid
-  [["-" "-" "-" 2 6 "-" 7 "-" 1]
-   [6 8 "-" "-" 7 "-" "-" 9 "-"]
-   [1 9 "-" "-" "-" 4 5 "-" "-"]
-   [8 2 "-" 1 "-" "-" "-" 4 "-"]
-   ["-" "-" 4 6 "-" 2 9 "-" "-"]
-   ["-" 5 "-" "-" "-" 3 "-" 2 8]
-   ["-" "-" 9 3 "-" "-" "-" 7 "-"]
-   ["-" 4 "-" "-" 5 "-" "-" 3 "-"]
-   [7 "-" 3 "-" 1 8 "-" "-" "-"]])
+;; initial sudoku grid
+;; map with sudoku matrices
+(def grids {:easy  [["-" "-" "-" 2 6 "-" 7 "-" 1]
+                    [6 8 "-" "-" 7 "-" "-" 9 "-"]
+                    [1 9 "-" "-" "-" 4 5 "-" "-"]
+                    [8 2 "-" 1 "-" "-" "-" 4 "-"]
+                    ["-" "-" 4 6 "-" 2 9 "-" "-"]
+                    ["-" 5 "-" "-" "-" 3 "-" 2 8]
+                    ["-" "-" 9 3 "-" "-" "-" 7 "-"]
+                    ["-" 4 "-" "-" 5 "-" "-" 3 "-"]
+                    [7 "-" 3 "-" 1 8 "-" "-" "-"]]
+
+            :medium  [["-" 2 "-" 6 "-" 8 "-" "-" "-"]
+                      [5 8 "-" "-" "-" 9 7 "-" "-"]
+                      ["-" "-" "-" "-" 4 "-" "-" "-" "-"]
+                      [3 7 "-" "-" "-" "-" 5 "-" "-"]
+                      [6 "-" "-" "-" "-" "-" "-" "-" 4]
+                      ["-" "-" 8 "-" "-" "-" "-" 1 3]
+                      ["-" "-" "-" "-" 2 "-" "-" "-" "-"]
+                      ["-" "-" 9 8 "-" "-" "-" 3 6]
+                      ["-" "-" "-" 3 "-" 6 "-" 9 "-"]]
+
+            :hard [["-" "-" "-" 2 6 "-" 7 "-" 1]
+                   [6 8 "-" "-" 7 "-" "-" 9 "-"]
+                   [1 9 "-" "-" "-" 4 5 "-" "-"]
+                   [8 2 "-" 1 "-" "-" "-" 4 "-"]
+                   ["-" "-" 4 6 "-" 2 9 "-" "-"]
+                   ["-" 5 "-" "-" "-" 3 "-" 2 8]
+                   ["-" "-" 9 3 "-" "-" "-" 7 "-"]
+                   ["-" 4 "-" "-" 5 "-" "-" 3 "-"]
+                   [7 "-" 3 "-" 1 8 "-" "-" "-"]] })
 
 ;;function for printing the grid
 (defn print-sudoku [grid]
   (doseq [i (range 9)]
     (when (and (zero? (rem i 3)) (not (= i 0)) )
-      (println "==================================")
-      )
+      (println "=================================="))
     (doseq [j (range 9)]
       (when (zero? (rem j 3))
-        (print "| ")
-        )
-      (print (get-in grid [i j]) " ")
-      )
+        (print "| "))
+      (print (get-in grid [i j]) " "))
     (println "| ")))
+
+;; get difficulty from user
+(defn get-input-difficulty []
+  (println "Enter difficulty: easy | medium | hard ")
+  (let [input-diff (read-line)]
+    (cond
+      (= input-diff "easy") (get grids :easy)
+      (= input-diff "medium") (get grids :medium)
+      (= input-diff "hard") (get grids :hard)
+      :else (do
+              (println "Invalid input. PLease try again.")
+              (recur))
+      )))
 
 ;; VALIDATIONS
 (defn valid-number-entered? [num]
@@ -98,10 +128,10 @@
     (solver grid)
     (= 0 1)))
 
-(defn play-sudoku [board]
+(defn play-sudoku []
   (println "Welcone to Sudoku! Let's play!")
-
-  (loop [sudoku board]
+  (let [board-input (get-input-difficulty)]
+  (loop [sudoku board-input]
     (println "Current sudoku:")
     (print-sudoku sudoku)
     (println "Enter a number (1 - 9) followed by it's position in the matrix [ex. 5 0 2]")
@@ -135,7 +165,7 @@
             ;;FALSE invalid numbers, try again
             (do
               (println "Bad input... Please ty again...")
-              (recur sudoku))))))))
+              (recur sudoku)))))))))
 
-(defn -main []
-  (play-sudoku sudoku-grid))
+  (defn -main []
+    (play-sudoku))
