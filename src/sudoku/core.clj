@@ -1,5 +1,6 @@
 (ns sudoku.core
   (:require [sudoku.api-generator])
+  (:require [sudoku.stopwatch])
   (:gen-class))
 
 ;;function for printing the grid
@@ -115,7 +116,8 @@
   (println "Welcone to Sudoku! Let's play!")
   (let [name (get-user-name)
         difficulty-level (get-input-difficulty)
-        initial-generated-sudoku (sudoku.api-generator/get-new-generated-sudoku difficulty-level)]
+        initial-generated-sudoku (sudoku.api-generator/get-new-generated-sudoku difficulty-level)
+        time-counted (sudoku.stopwatch/start-stopwatch)]
     (loop [sudoku initial-generated-sudoku]
       (println "Current sudoku:")
       (print-sudoku sudoku initial-generated-sudoku)
@@ -140,6 +142,7 @@
                       (if (sudoku-filled? new-board)
                         ;;TRUE: All postions are filled
                         (do
+                          (println (str "\u001B[34m" "You're time is: " (sudoku.stopwatch/format-duration (sudoku.stopwatch/stop-stopwatch))))
                           (println (str "\u001B[34m" "Congratulations! You have solved Sudoku!"))
                           (print-sudoku new-board initial-generated-sudoku)
                           (println "Existing game. Bye!"))
