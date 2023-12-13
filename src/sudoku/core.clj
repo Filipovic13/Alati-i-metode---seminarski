@@ -3,15 +3,19 @@
   (:gen-class))
 
 ;;function for printing the grid
-(defn print-sudoku [grid]
+(defn print-sudoku [grid initial]
   (doseq [i (range 9)]
     (when (and (zero? (rem i 3)) (not (= i 0)))
-      (println "=================================="))
+      (println (str "\u001B[0m" "=========================")))
     (doseq [j (range 9)]
       (when (zero? (rem j 3))
-        (print "| "))
-      (print (get-in grid [i j]) " "))
-    (println "| ")))
+        (print (str "\u001B[0m" "| ")))
+      (let [initial-value (get-in initial [i j])
+            cell-color (if (number? initial-value)
+                         "\u001B[33m"                       ; Yellow for given sudoku numbers
+                         "\u001B[0m")]
+        (print (str cell-color (get-in grid [i j]) " "))))
+    (println (str "\u001B[0m" "| "))))
 
 ;; get difficulty from user
 (defn get-input-difficulty []
@@ -111,10 +115,10 @@
   (println "Welcone to Sudoku! Let's play!")
   (let [name (get-user-name)
         difficulty-level (get-input-difficulty)
-        generated-sudoku (sudoku.api-generator/get-new-generated-sudoku difficulty-level)]
-    (loop [sudoku generated-sudoku]
+        initial-generated-sudoku (sudoku.api-generator/get-new-generated-sudoku difficulty-level)]
+    (loop [sudoku initial-generated-sudoku]
       (println "Current sudoku:")
-      (print-sudoku sudoku)
+      (print-sudoku sudoku initial-generated-sudoku)
       (println "Enter a number (1 - 9) followed by it's position in the matrix [ex. 5 0 2]")
       (println "Or enter 'q' to quit the game.")
       (let [user-input (read-line)]
@@ -132,18 +136,18 @@
                   (if (move-correct num row col sudoku)
                     ;;TRUE: MOVE CORRECT
                     (let [new-board (assoc-in sudoku [row col] num)]
-                      (println "Bravoo! Correct move!")
+                      (println (str "\u001B[32m" "Bravoo! Correct move!"))
                       (if (sudoku-filled? new-board)
                         ;;TRUE: All postions are filled
                         (do
-                          (println "Congratulations! You have solved Sudoku!")
-                          (print-sudoku new-board)
+                          (println (str "\u001B[34m" "Congratulations! You have solved Sudoku!"))
+                          (print-sudoku new-board initial-generated-sudoku)
                           (println "Existing game. Bye!"))
                         ;;FALSE: Continue game
                         (recur new-board)))
                     ;;FALSE MOVE INCORRECT
                     (do
-                      (println "Move incorrect.....")
+                      (println (str "\u001B[31m" "Move incorrect....."))
                       (recur sudoku))))
                 ;;FALSE invalid numbers, try again
                 (do
@@ -153,8 +157,7 @@
             (do
               (println "Invalid arguments...")
               (println "Please enter 3 integers.. [number row column] 5 0 1")
-              (recur sudoku)
-              )()
+              (recur sudoku))
             ))))))
 
 (defn -main []
