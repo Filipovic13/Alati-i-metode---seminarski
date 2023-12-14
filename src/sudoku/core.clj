@@ -1,6 +1,7 @@
 (ns sudoku.core
   (:require [sudoku.api-generator])
   (:require [sudoku.stopwatch])
+  (:require [sudoku.database :as db])
   (:gen-class))
 
 ;;function for printing the grid
@@ -75,7 +76,8 @@
                       (get-in grid [i j]))))))))
 
 (defn sudoku-rules-valid? [num row col grid]
-  (and (row-free-of-num? num row grid)
+  (and (position-empty? row col grid)
+       (row-free-of-num? num row grid)
        (column-free-of-num? num col grid)
        (block-free-of-num? num row col grid)))
 
@@ -104,10 +106,7 @@
           nil)))))
 
 (defn move-correct [num row col grid]
-  (if (and (position-empty? row col grid)
-           (row-free-of-num? num row grid)
-           (column-free-of-num? num col grid)
-           (block-free-of-num? num row col grid))
+  (if (sudoku-rules-valid? num row col grid)
     (solver-dash grid)
     nil))
 
@@ -116,8 +115,8 @@
   (println "Welcone to Sudoku! Let's play!")
   (let [name (get-user-name)
         difficulty-level (get-input-difficulty)
-        initial-generated-sudoku (sudoku.api-generator/get-new-generated-sudoku difficulty-level)
-        time-counted (sudoku.stopwatch/start-stopwatch)]
+        initial-generated-sudoku (sudoku.api-generator/get-new-generated-sudoku difficulty-level)]
+    (sudoku.stopwatch/start-stopwatch)
     (loop [sudoku initial-generated-sudoku]
       (println "Current sudoku:")
       (print-sudoku sudoku initial-generated-sudoku)
@@ -142,10 +141,38 @@
                       (if (sudoku-filled? new-board)
                         ;;TRUE: All postions are filled
                         (do
-                          (println (str "\u001B[34m" "You're time is: " (sudoku.stopwatch/format-duration (sudoku.stopwatch/stop-stopwatch))))
-                          (println (str "\u001B[34m" "Congratulations! You have solved Sudoku!"))
-                          (print-sudoku new-board initial-generated-sudoku)
-                          (println "Existing game. Bye!"))
+                          (let [time-elapsed (sudoku.stopwatch/format-duration (sudoku.stopwatch/stop-stopwatch))]
+                            (println (str "\u001B[34m" "You're time is: " time-elapsed))
+                            (println (str "\u001B[34m" "Congratulations! You have solved Sudoku!"))
+                            (db/save-game name difficulty-level time-elapsed)
+                            (print-sudoku new-board initial-generated-sudoku)
+
+                            ((fn mini-menu []
+                               (println "Mini menu:")
+                               (println "1 - See rankings by your difficulty")
+                               (println "2 - See rankings by all difficulties")
+                               (println "3 - Play new game")
+                               (println "4 - Exit game")
+                               (let [input (read-line)]
+                                 (cond
+                                   (= input "1") (do
+                                                   (db/print-rankings-by-difficulty difficulty-level)
+                                                   (recur))
+                                   (= input "2") (do
+                                                   (db/print-all-rankings)
+                                                   (recur))
+                                   (= input "3") (do
+                                                   (play-sudoku)
+                                                   (recur))
+                                   (= input "4") (do
+                                                   (println "Existing game.")
+                                                   (System/exit 0))
+                                   :else (do
+                                           (println (str "\u001B[35m" "Invalid input... Please enter one of four option."))
+                                           (recur ))))) )
+
+
+                            (println "Bye!")))
                         ;;FALSE: Continue game
                         (recur new-board)))
                     ;;FALSE MOVE INCORRECT
@@ -154,14 +181,16 @@
                       (recur sudoku))))
                 ;;FALSE invalid numbers, try again
                 (do
-                  (println "Bad input..a. Please ty again...")
+                  (println (str "\u001B[35m" "Bad input..a. Please ty again..."))
                   (recur sudoku))))
             ; FALSE: wrong number of arguments or not all integers
             (do
-              (println "Invalid arguments...")
-              (println "Please enter 3 integers.. [number row column] 5 0 1")
+              (println (str "\u001B[35m" "Invalid arguments..."))
+              (println (str "\u001B[35m" "Please enter 3 integers.. [number row column] 5 0 1"))
               (recur sudoku))
             ))))))
+
+
 
 (defn -main []
   (play-sudoku))

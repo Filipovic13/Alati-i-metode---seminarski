@@ -23,7 +23,7 @@
 
 (defn remove-positions [solved-sudoku difficulty-level]
   (let [cells-to-remove (cond
-                          (= difficulty-level "extreme easy") 5
+                          (= difficulty-level "extreme easy") 2
                           (= difficulty-level "easy") 30
                           (= difficulty-level "medium") 40
                           (= difficulty-level "hard") 50)]

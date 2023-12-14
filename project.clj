@@ -8,6 +8,7 @@
                  [org.clojure/java.jdbc "0.7.12"]
                  [clj-http "3.12.0"]
                  [cheshire "5.10.0"]
+                 [clj-time "0.15.1"]
                  ]
   :main ^:skip-aot sudoku.core
   :target-path "target/%s"
