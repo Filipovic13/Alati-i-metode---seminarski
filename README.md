@@ -91,5 +91,6 @@ Difficulty: medium
   3. Misa 00:06:02
 
 Difficulty: hard
-  1. Pera 00:05:0
+  1. Pera 00:05:01
+  2. Daki 00:06:33
 ```
